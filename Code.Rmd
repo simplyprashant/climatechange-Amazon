@@ -1,0 +1,853 @@
+---
+title: "Code"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r eval=FALSE,echo=TRUE}
+library(ggplot2) # package for plotting
+library(readxl) #Working with excel files
+library(tidyverse)
+library(stringr)
+
+#Setting the working directory
+setwd("C:/Users/prash/Desktop/Project")
+
+##### Multivariate ENSO index########################################
+#Reading in the ENSO data
+mei <- read_excel("ENSO Index.xlsx")
+
+#Data Wrangling
+mei_lon <- gather(mei, months, MEI, DJ:ND, factor_key = TRUE)
+
+#Arranging in ascending order
+mei_lon <- mei_lon[order(mei_lon$YEAR), ]
+
+#Converting year to factor
+mei_lon$YEAR <- as.factor(mei_lon$YEAR)
+
+#Creating a copy dataset
+smei_lon <- mei_lon
+
+#Changing months to character
+smei_lon$months <- as.character(smei_lon$months)
+
+#Alloting months a sequence character eg: December-January as 1
+smei_lon$months[smei_lon$months == 'DJ'] <- '01'
+smei_lon$months[smei_lon$months == 'JF'] <- "02"
+smei_lon$months[smei_lon$months == 'FM'] <- "03"
+smei_lon$months[smei_lon$months == 'MA'] <- '04'
+smei_lon$months[smei_lon$months == 'AM'] <- '05'
+smei_lon$months[smei_lon$months == 'MJ'] <- '06'
+smei_lon$months[smei_lon$months == 'JJ'] <- '07'
+smei_lon$months[smei_lon$months == 'JA'] <- '08'
+smei_lon$months[smei_lon$months == 'AS'] <- '09'
+smei_lon$months[smei_lon$months == 'SO'] <- '10'
+smei_lon$months[smei_lon$months == 'ON'] <- '11'
+smei_lon$months[smei_lon$months == 'ND'] <- '12'
+
+#Creating date format
+smei_lon$Time <- str_c(smei_lon$YEAR,'-',smei_lon$months)
+smei_lon$Time <- str_c(smei_lon$Time, '-01')
+
+#Changing data type from character to date
+smei_lon$Time <- as.Date(smei_lon$Time)
+
+#Plotting MEI values
+ggplot(smei_lon, aes(x=Time, y=MEI)) +
+  geom_area() +
+  labs(title = 'Multivariate ENSO Index (1979-2022)',
+       x = 'Year',
+       y = 'ENSO Index')
+
+#Filter data for color fill
+upr <- smei_lon %>% 
+  filter(MEI >= 0)
+
+lwr <- smei_lon %>% 
+  filter(MEI < 0)
+
+#Plotting final MEI plot
+ggplot(smei_lon, aes(x=Time, y=MEI)) +
+  geom_col(data = lwr, fill = 'blue') +
+  geom_col(data = upr, fill = 'red') +
+  geom_hline(yintercept=2, linetype="dashed", color = "black")+
+  geom_hline(yintercept=-2, linetype="dashed", color = "black")+
+  labs(title = 'Multivariate ENSO Index (1979-2022)',
+       x = 'Year',
+       y = 'ENSO Index')
+
+############ NDVI ##############################
+
+library(ncdf4) # package for netcdf manipulation
+library(raster) # package for raster manipulation
+library(rgdal) # package for geospatial analysis
+library(ggplot2) # package for plotting
+library(tidyverse)
+
+#Loading netCDF files for NDVI for the period 2010 to 2022
+nc_1 <- nc_open('C:/Users/prash/Desktop/Project/NDVI/AVHRR-Land_v005_AVH13C1_NOAA-19_20100601_c20170406132557.nc')
+nc_2 <- nc_open('C:/Users/prash/Desktop/Project/NDVI/AVHRR-Land_v005_AVH13C1_NOAA-19_20110601_c20170407034511.nc')
+nc_3 <- nc_open('C:/Users/prash/Desktop/Project/NDVI/AVHRR-Land_v005_AVH13C1_NOAA-19_20120601_c20170407155136.nc')
+nc_4 <- nc_open('C:/Users/prash/Desktop/Project/NDVI/AVHRR-Land_v005_AVH13C1_NOAA-19_20130601_c20170408061931.nc')
+nc_5 <- nc_open('C:/Users/prash/Desktop/Project/NDVI/VIIRS-Land_v001-preliminary_NPP13C1_S-NPP_20140601_c20220416004656.nc')
+nc_6 <- nc_open('C:/Users/prash/Desktop/Project/NDVI/VIIRS-Land_v001-preliminary_NPP13C1_S-NPP_20150601_c20220416162532.nc')
+nc_7 <- nc_open('C:/Users/prash/Desktop/Project/NDVI/VIIRS-Land_v001-preliminary_NPP13C1_S-NPP_20160601_c20220417102702.nc')
+nc_8 <- nc_open('C:/Users/prash/Desktop/Project/NDVI/VIIRS-Land_v001-preliminary_NPP13C1_S-NPP_20170601_c20220417202948.nc')
+nc_9 <- nc_open('C:/Users/prash/Desktop/Project/NDVI/VIIRS-Land_v001-preliminary_NPP13C1_S-NPP_20180601_c20220418070417.nc')
+nc_10 <- nc_open('C:/Users/prash/Desktop/Project/NDVI/VIIRS-Land_v001-preliminary_NPP13C1_S-NPP_20190601_c20220418173848.nc')
+nc_11 <- nc_open('C:/Users/prash/Desktop/Project/NDVI/VIIRS-Land_v001-preliminary_NPP13C1_S-NPP_20200601_c20220419043235.nc')
+nc_12 <- nc_open('C:/Users/prash/Desktop/Project/NDVI/VIIRS-Land_v001-preliminary_NPP13C1_S-NPP_20210601_c20220419150743.nc')
+nc_13 <- nc_open('C:/Users/prash/Desktop/Project/NDVI/VIIRS-Land_v001-preliminary_NPP13C1_S-NPP_20220601_c20220606124456.nc')
+
+#Printing metadata file
+{
+sink('nc_1 metadata.txt')
+  print(nc_1)
+  sink()
+}
+
+#Extracting the longitude from nc file
+lon_1 <- ncvar_get(nc_1, "longitude")
+lon_2 <- ncvar_get(nc_2, "longitude")
+lon_3 <- ncvar_get(nc_3, "longitude")
+lon_4 <- ncvar_get(nc_4, "longitude")
+lon_5 <- ncvar_get(nc_5, "longitude")
+lon_6 <- ncvar_get(nc_6, "longitude")
+lon_7 <- ncvar_get(nc_7, "longitude")
+lon_8 <- ncvar_get(nc_8, "longitude")
+lon_9 <- ncvar_get(nc_9, "longitude")
+lon_10 <- ncvar_get(nc_10, "longitude")
+lon_11 <- ncvar_get(nc_11, "longitude")
+lon_12 <- ncvar_get(nc_12, "longitude")
+lon_13 <- ncvar_get(nc_13, "longitude")
+
+#Extracting the latitude from the nc file
+lat_1 <- ncvar_get(nc_1, "latitude")
+lat_2 <- ncvar_get(nc_2, "latitude")
+lat_3 <- ncvar_get(nc_3, "latitude")
+lat_4 <- ncvar_get(nc_4, "latitude")
+lat_5 <- ncvar_get(nc_5, "latitude")
+lat_6 <- ncvar_get(nc_6, "latitude")
+lat_7 <- ncvar_get(nc_7, "latitude")
+lat_8 <- ncvar_get(nc_8, "latitude")
+lat_9 <- ncvar_get(nc_9, "latitude")
+lat_10 <- ncvar_get(nc_10, "latitude")
+lat_11 <- ncvar_get(nc_11, "latitude")
+lat_12 <- ncvar_get(nc_12, "latitude")
+lat_13 <- ncvar_get(nc_13, "latitude")
+
+#Extracting time dimension from the nc file
+t_1 <- ncvar_get(nc_1, "time")
+t_2 <- ncvar_get(nc_2, "time")
+t_3 <- ncvar_get(nc_3, "time")
+t_4 <- ncvar_get(nc_4, "time")
+t_5 <- ncvar_get(nc_5, "time")
+t_6 <- ncvar_get(nc_6, "time")
+t_7 <- ncvar_get(nc_7, "time")
+t_8 <- ncvar_get(nc_8, "time")
+t_9 <- ncvar_get(nc_9, "time")
+t_10 <- ncvar_get(nc_10, "time")
+t_11 <- ncvar_get(nc_11, "time")
+t_12 <- ncvar_get(nc_12, "time")
+t_13 <- ncvar_get(nc_13, "time")
+
+#Extracting the required NDVI variable from nc file
+ndvi_1 <- ncvar_get(nc_1, "NDVI")
+ndvi_2 <- ncvar_get(nc_2, "NDVI")
+ndvi_3 <- ncvar_get(nc_3, "NDVI")
+ndvi_4 <- ncvar_get(nc_4, "NDVI")
+ndvi_5 <- ncvar_get(nc_5, "NDVI")
+ndvi_6 <- ncvar_get(nc_6, "NDVI")
+ndvi_7 <- ncvar_get(nc_7, "NDVI")
+ndvi_8 <- ncvar_get(nc_8, "NDVI")
+ndvi_9 <- ncvar_get(nc_9, "NDVI")
+ndvi_10 <- ncvar_get(nc_10, "NDVI")
+ndvi_11 <- ncvar_get(nc_11, "NDVI")
+ndvi_12 <- ncvar_get(nc_12, "NDVI")
+ndvi_13 <- ncvar_get(nc_13, "NDVI")
+
+#Checking the fill value which is the missing value 
+fillvalue_1 <- ncatt_get(nc_1, "NDVI", "_FillValue")
+fillvalue_2 <- ncatt_get(nc_2, "NDVI", "_FillValue")
+fillvalue_3 <- ncatt_get(nc_3, "NDVI", "_FillValue")
+fillvalue_4 <- ncatt_get(nc_4, "NDVI", "_FillValue")
+fillvalue_5 <- ncatt_get(nc_5, "NDVI", "_FillValue")
+fillvalue_6 <- ncatt_get(nc_6, "NDVI", "_FillValue")
+fillvalue_7 <- ncatt_get(nc_7, "NDVI", "_FillValue")
+fillvalue_8 <- ncatt_get(nc_8, "NDVI", "_FillValue")
+fillvalue_9 <- ncatt_get(nc_9, "NDVI", "_FillValue")
+fillvalue_10 <- ncatt_get(nc_10, "NDVI", "_FillValue")
+fillvalue_11 <- ncatt_get(nc_11, "NDVI", "_FillValue")
+fillvalue_12 <- ncatt_get(nc_12, "NDVI", "_FillValue")
+fillvalue_13 <- ncatt_get(nc_13, "NDVI", "_FillValue")
+
+#Closing the netCDF files as the data extraction is complete
+nc_close(nc_1)
+nc_close(nc_2)
+nc_close(nc_3)
+nc_close(nc_4)
+nc_close(nc_5)
+nc_close(nc_6)
+nc_close(nc_7)
+nc_close(nc_8)
+nc_close(nc_9)
+nc_close(nc_10)
+nc_close(nc_11)
+nc_close(nc_12)
+nc_close(nc_13)
+
+#Replacing the missing values with NA as the standard
+ndvi_1[ndvi_1 == fillvalue_1$value] <- NA
+ndvi_2[ndvi_2 == fillvalue_2$value] <- NA
+ndvi_3[ndvi_3 == fillvalue_3$value] <- NA
+ndvi_4[ndvi_4 == fillvalue_4$value] <- NA
+ndvi_5[ndvi_5 == fillvalue_5$value] <- NA
+ndvi_6[ndvi_6 == fillvalue_6$value] <- NA
+ndvi_7[ndvi_7 == fillvalue_7$value] <- NA
+ndvi_8[ndvi_8 == fillvalue_8$value] <- NA
+ndvi_9[ndvi_9 == fillvalue_9$value] <- NA
+ndvi_10[ndvi_10 == fillvalue_10$value] <- NA
+ndvi_11[ndvi_11 == fillvalue_11$value] <- NA
+ndvi_12[ndvi_12 == fillvalue_12$value] <- NA
+ndvi_13[ndvi_13 == fillvalue_13$value] <- NA
+
+#Converting NDVI variable (2010) into a raster brick
+r_1 <- raster(t(ndvi_1), xmn=min(lon_1), xmx=max(lon_1), ymn=min(lat_1), ymx=max(lat_1),
+              crs=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs+ towgs84=0,0,0"))
+
+plot(r_1)
+plot(r_1, xlim = c(-100,-30), ylim = c(-20,10))
+
+
+#Converting NDVI (2022) into a raster brick
+r_13 <- raster(t(ndvi_13), xmn=min(lon_13), xmx=max(lon_13), ymn=min(lat_13), ymx=max(lat_13),
+              crs=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs+ towgs84=0,0,0"))
+plot(r_13)
+plot(r_13, xlim = c(-100,-30), ylim = c(-20,10))
+
+
+#Difference in NDVI between 2010 and 2022
+ndvi.diff <- ndvi_13 - ndvi_1
+r_diff <- raster(t(ndvi.diff), xmn=min(lon_1),
+                 xmx=max(lon_1), ymn=min(lat_1), ymx=max(lat_1), crs=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs+ towgs84=0,0,0"))
+
+#Plotting the results
+plot(r_diff, xlim = c(-100,-30), ylim = c(-20,10))
+title(main = "Difference in NDVI between 2010 and 2022",
+      xlab = "Longitude", ylab = "Latitude",
+      cex.main = 2,   font.main= 4, col.main= "red",
+      cex.sub = 0.75, font.sub = 3, col.sub = "green",
+      col.lab ="darkblue"
+)
+
+#COnverting NDVI(2014-2016) into raster to check changes during 
+# El-Nino phase
+
+#2014
+r_5 <- raster(t(ndvi_5), xmn=min(lon_5), xmx=max(lon_5), ymn=min(lat_5), ymx=max(lat_5),
+              crs=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs+ towgs84=0,0,0"))
+
+
+#2015
+r_6 <- raster(t(ndvi_6), xmn=min(lon_6), xmx=max(lon_6), ymn=min(lat_6), ymx=max(lat_6),
+               crs=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs+ towgs84=0,0,0"))
+
+#2016
+r_7 <- raster(t(ndvi_7), xmn=min(lon_7), xmx=max(lon_7), ymn=min(lat_7), ymx=max(lat_7),
+              crs=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs+ towgs84=0,0,0"))
+
+#NDVI - June 2014
+par(mfrow = c(1,3))
+plot(r_5, xlim = c(-100,-30), ylim = c(-30,10))
+title(main = "Spatial variation of NDVI in June 2014",
+      xlab = "Longitude", ylab = "Latitude",
+      cex.main = 1,   font.main= 2, col.main= "Black",
+      cex.sub = 0.75, font.sub = 3, col.sub = "green",
+      col.lab ="darkblue"
+)
+
+#NDVI - June 2015
+plot(r_6, xlim = c(-100,-30), ylim = c(-30,10))
+title(main = "Spatial variation of NDVI in June 2015",
+      xlab = "Longitude", ylab = "Latitude",
+      cex.main = 1,   font.main= 2, col.main= "Black",
+      cex.sub = 0.75, font.sub = 3, col.sub = "green",
+      col.lab ="darkblue"
+)
+
+#NDVI - June 2016
+plot(r_7, xlim = c(-100,-30), ylim = c(-30,10))
+title(main = "Spatial variation of NDVI in June 2016",
+      xlab = "Longitude", ylab = "Latitude",
+      cex.main = 1,   font.main= 2, col.main= "Black",
+      cex.sub = 0.75, font.sub = 3, col.sub = "green",
+      col.lab ="darkblue")
+
+#Difference in NDVI during 2014-2016 El Nino period
+ndvi.nino <- ndvi_7 - ndvi_5
+r_nino <- raster(t(ndvi.nino), xmn=min(lon_5),
+                 xmx=max(lon_5), ymn=min(lat_5), ymx=max(lat_5), crs=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs+ towgs84=0,0,0"))
+
+plot(r_nino, xlim = c(-100,-30), ylim = c(-20,10))
+title(main = "Difference in NDVI during the El-Nino period (2014-2016)",
+      xlab = "Longitude", ylab = "Latitude",
+      cex.main = 2,   font.main= 4, col.main= "red",
+      cex.sub = 0.75, font.sub = 3, col.sub = "green",
+      col.lab ="darkblue"
+)
+
+#Creating time series for NDVI at 4 different locations in the Amazon basin
+
+#NDVI values for the period 2010 - 2022 at 4 sites
+NDVI1 <- c(ndvi_1[2355,1846],ndvi_2[2355,1846],ndvi_3[2355,1846],ndvi_4[2355,1846],
+               ndvi_5[2355,1846],ndvi_6[2355,1846],ndvi_7[2355,1846],ndvi_8[2355,1846],
+               ndvi_9[2355,1846],ndvi_10[2355,1846],ndvi_11[2355,1846],ndvi_12[2355,1846],
+               ndvi_13[2355,1846])
+
+NDVI2 <- c(ndvi_1[2370,1800],ndvi_2[2370,1800],ndvi_3[2370,1800],ndvi_4[2370,1800],
+           ndvi_5[2370,1800],ndvi_6[2370,1800],ndvi_7[2370,1800],ndvi_8[2370,1800],
+           ndvi_9[2370,1800],ndvi_10[2370,1800],ndvi_11[2370,1800],ndvi_12[2370,1800],
+           ndvi_13[2370,1800])
+
+NDVI3 <- c(ndvi_1[2310,1911],ndvi_2[2310,1911],ndvi_3[2310,1911],ndvi_4[2310,1911],
+           ndvi_5[2310,1911],ndvi_6[2310,1911],ndvi_7[2310,1911],ndvi_8[2310,1911],
+           ndvi_9[2310,1911],ndvi_10[2310,1911],ndvi_11[2310,1911],ndvi_12[2310,1911],
+           ndvi_13[2310,1911])
+
+NDVI4 <- c(ndvi_1[2190,1911],ndvi_2[2190,1911],ndvi_3[2190,1911],ndvi_4[2190,1911],
+          ndvi_5[2190,1911],ndvi_6[2190,1911],ndvi_7[2190,1911],ndvi_8[2190,1911],
+           ndvi_9[2190,1911],ndvi_10[2190,1911],ndvi_11[2190,1911],ndvi_12[2190,1911],
+           ndvi_13[2190,1911])
+
+#Creating a data frame
+ts <- data.frame(year = seq(from=2010, to=2022, by=1), Loc1 = NDVI1,
+                 Loc2 = NDVI2, Loc3 = NDVI3, Loc4 = NDVI4)
+
+#creating a plot of NDVI variation
+ggplot(ts, aes(x=year, group =1)) +
+  geom_line(aes(y = Loc1), color = "black") +
+  geom_line(aes(y = Loc2), color = "steelblue", linetype = "twodash") +
+  geom_line(aes(y = Loc3), color = "green", linetype = "twodash") +
+  geom_line(aes(y = Loc4), color = "yellow", linetype = "twodash") +
+  ggtitle("Growing season NDVI at 4 different locations in the Amazon basin")     
+
+
+###############################################################################
+############## Precipitation data ############################################
+
+library(ncdf4) # package for netcdf manipulation
+library(raster) # package for raster manipulation
+library(rgdal) # package for geospatial analysis
+library(ggplot2) # package for plotting
+library(gridExtra)
+
+#Loading the precipitation netcdf file
+prec <- nc_open("C:/Users/prash/Desktop/Project/Tempprec/timeseries-pr-annual-mean_era_annual_era5-0.5x0.5-timeseries_mean_1950-2020.nc")
+
+#Printing metadata file
+{
+  sink('Precipitation metadata.txt')
+  print(prec)
+  sink()
+}
+
+#Extracting the longitude, latitude and the year dimensions
+plon <- ncvar_get(prec, "lon")
+plat <- ncvar_get(prec, "lat")
+pyear <- ncvar_get(prec, "year")
+
+#Extracting the precipitation variable
+
+ppt <- ncvar_get(prec, "timeseries-pr-annual-mean")
+dim(ppt) #Verifying the dimension with the metadata table
+
+#Checking the fill value which is the missing value 
+fillval <- ncatt_get(prec, "timeseries-pr-annual-mean", "_FillValue")
+fillval
+
+#Close the nc file
+nc_close(prec)
+
+#Replacing the missing values with NA as the standard
+ppt[ppt == fillval$value] <- NA
+
+#Extracting the precipitation values for 20 year period(2000-2020) at the above
+#mentioned site 1,2,3 and 4  
+#Site 1: (-2.25,-62.25)
+#Site 2: (-5.25,-64.25)
+#Site 3: (-5.25,-70.25)
+#Site 4: (-5.25,-61.75)
+
+#creating empty vectors
+Prec1 = c()
+Prec2 = c()
+Prec3 = c()
+Prec4 = c()
+
+#Appending precipitation values for the years 2010-2020 
+#61 refers to the year number in the period 1950-2020 (i.e. 2010)
+for(j in 61:71){
+  ppt1 <- ppt[236,176,j]
+  ppt2 <- ppt[232,170,j]
+  ppt3 <- ppt[220,170,j]
+  ppt4 <- ppt[237,170,j]
+  Prec1 <- append(Prec1,ppt1)
+  Prec2 <- append(Prec2,ppt2)
+  Prec3 <- append(Prec3,ppt3)
+  Prec4 <- append(Prec4,ppt4)
+}
+
+#Data frame of the precipitation values
+pts <- data.frame(year = 2010:2020, Site_1 = Prec1, Site_2 = Prec2,
+                  Site_3 = Prec3, Site_4 = Prec4)
+
+#Plots for the 4 sites
+st1 <- ggplot(pts, aes(x=as.factor(year), y=Site_1, group=1)) +
+  geom_point()+
+  geom_line() +
+  geom_smooth(se=F)+
+  geom_tile(aes(x = as.factor(2015), y=2800), height = 1000,width = 2, alpha = 0.05,fill = 'grey50')+
+  labs(x = "Year", y = "Precipitation (in mm)")+
+  ggtitle("Precipitation trend at Site 1")      # Set title
+
+st2 <- ggplot(pts, aes(x=as.factor(year), y=Site_2,group=1)) +
+  geom_point()+
+  geom_line() +
+  geom_smooth(se=F)+
+  geom_tile(aes(x = as.factor(2015), y=2800), height = 1000,width = 2, alpha = 0.05,fill = 'grey50')+
+  labs(x = "Year", y = "Precipitation (in mm)")+
+  ggtitle("Precipitation trend at Site 2")      # Set title
+
+st3 <- ggplot(pts, aes(x=as.factor(year), y=Site_3, group=1)) +
+  geom_point()+
+  geom_line() +
+  geom_smooth(se=F)+
+  geom_tile(aes(x = as.factor(2015), y=2800), height = 1000,width = 2, alpha = 0.05,fill = 'grey50')+
+  labs(x = "Year", y = "Precipitation (in mm)")+
+  ggtitle("Precipitation trend at Site 3")      # Set title
+
+st4 <- ggplot(pts, aes(x=as.factor(year), y=Site_4, group=1)) +
+  geom_point()+
+  geom_line() +
+  geom_smooth(method = 'loess', se = F)+
+  geom_tile(aes(x = as.factor(2015), y=2800), height = 1000,width = 2, alpha = 0.05,fill = 'grey50')+
+  labs(x = "Year", y = "Precipitation (in mm)")+
+  ggtitle("Precipitation trend at Site 4")      # Set title
+
+#Arranging the grid of plots
+grid.arrange(st1,st2,st3,st4, ncol = 2, nrow = 2)
+
+###############################################################################
+################### Temperature data ##########################################
+
+#loading temperature nc file
+temp <- nc_open("C:/Users/prash/Desktop/Project/Tempprec/timeseries-tas-annual-mean_era_annual_era5-0.5x0.5-timeseries_mean_1950-2020.nc")
+
+#Printing metadata file
+{
+  sink('temperature metadata.txt')
+  print(temp)
+  sink()
+}
+
+#Extracting the longitude, latitude and the year dimensions
+tlon <- ncvar_get(temp, "lon")
+tlat <- ncvar_get(temp, "lat")
+tyear <- ncvar_get(temp, "year")
+
+#Extracting the temperature variable
+
+tt <- ncvar_get(temp, "timeseries-tas-annual-mean")
+dim(tt)
+
+#Checking the fill value which is the missing value   
+fillval_t <- ncatt_get(temp, "timeseries-tas-annual-mean", "_FillValue")
+fillval_t
+
+#Close the nc file
+nc_close(temp)
+
+#Replacing the missing values with NA as the standard
+tt[tt == fillval_t$value] <- NA
+
+#Extracting the temperature values for 20 year period(2000-2020) at the below
+#mentioned site 1,2,3 and 4  
+#Site 1: (-2.25,-62.25)
+#Site 2: (-5.25,-64.25)
+#Site 3: (-5.25,-70.25)
+#Site 4: (-5.25,-61.75)
+
+temp1 = c()
+temp2 = c()
+temp3 = c()
+temp4 = c()
+for(i in 61:71){
+  t1 <- tt[236,176,i]
+  t2 <- tt[232,170,i]
+  t3 <- tt[220,170,i]
+  t4 <- tt[237,170,i]
+  temp1 <- append(temp1,t1)
+  temp2 <- append(temp2,t2)
+  temp3 <- append(temp3,t3)
+  temp4 <- append(temp4,t4)
+}
+
+#Data frame of the temperature values
+temps <- data.frame(year = 2010:2020, te_1 = temp1, te_2 = temp2,
+                  te_3 = temp3, te_4 = temp4)
+
+#Plots
+T1 <- ggplot(temps, aes(x=as.factor(year), y=te_1, group=1)) +
+  geom_line() +
+  geom_point()+
+  geom_smooth(level=0.99, color = 'red')+
+  labs(x = "Year", y = 'Temperature (in Celcius)')+
+  ggtitle("Temperature trend at Site 1 ")      # Set title
+
+T2 <- ggplot(temps, aes(x=as.factor(year), y=te_2,group=1)) +
+  geom_line() +
+  geom_point()+
+  geom_smooth(level=0.99, color = 'red')+
+  labs(x = "Year", y = 'Temperature (in Celcius)')+
+  ggtitle("Temperature trend at Site 2 ")      # Set title
+
+T3 <- ggplot(temps, aes(x=as.factor(year), y=te_3, group=1)) +
+  geom_line() +
+  geom_point()+
+  geom_smooth(level=0.99, color = 'red')+
+  labs(x = "Year", y = 'Temperature (in Celcius)')+
+  ggtitle("Temperature trend at Site 3 ")      # Set title
+
+T4 <- ggplot(temps, aes(x=as.factor(year), y=te_4, group=1)) +
+  geom_line() +
+  geom_point()+
+  geom_smooth(level=0.99, color = 'red')+
+  labs(x = "Year", y = 'Temperature (in Celcius)')+
+  ggtitle("Temperature trend at Site 4")      # Set title
+
+grid.arrange(T1,T2,T3,T4, ncol = 2, nrow = 2)
+
+###############################################################################
+##################### Carbon flux data ########################################
+
+library(ncdf4) # package for netcdf manipulation
+library(raster) # package for raster manipulation
+library(rgdal) # package for geospatial analysis
+library(ggplot2) # package for plotting
+
+#Reading in the nc files for carbon flux
+nc_cd1 <- nc_open("C:/Users/prash/Desktop/Project/Carbon flux/200012.nc")
+nc_cd2 <- nc_open("C:/Users/prash/Desktop/Project/Carbon flux/200112.nc")
+nc_cd3 <- nc_open("C:/Users/prash/Desktop/Project/Carbon flux/200212.nc")
+nc_cd4 <- nc_open("C:/Users/prash/Desktop/Project/Carbon flux/200312.nc")
+nc_cd5 <- nc_open("C:/Users/prash/Desktop/Project/Carbon flux/200412.nc")
+nc_cd6 <- nc_open("C:/Users/prash/Desktop/Project/Carbon flux/200512.nc")
+nc_cd7 <- nc_open("C:/Users/prash/Desktop/Project/Carbon flux/200612.nc")
+nc_cd8 <- nc_open("C:/Users/prash/Desktop/Project/Carbon flux/200712.nc")
+nc_cd9 <- nc_open("C:/Users/prash/Desktop/Project/Carbon flux/200812.nc")
+nc_cd10 <- nc_open("C:/Users/prash/Desktop/Project/Carbon flux/200912.nc")
+nc_cd11 <- nc_open("C:/Users/prash/Desktop/Project/Carbon flux/201012.nc")
+nc_cd12 <- nc_open("C:/Users/prash/Desktop/Project/Carbon flux/201112.nc")
+nc_cd13 <- nc_open("C:/Users/prash/Desktop/Project/Carbon flux/201212.nc")
+nc_cd14 <- nc_open("C:/Users/prash/Desktop/Project/Carbon flux/201312.nc")
+nc_cd15 <- nc_open("C:/Users/prash/Desktop/Project/Carbon flux/201412.nc")
+nc_cd16 <- nc_open("C:/Users/prash/Desktop/Project/Carbon flux/201512.nc")
+nc_cd17 <- nc_open("C:/Users/prash/Desktop/Project/Carbon flux/201612.nc")
+nc_cd18 <- nc_open("C:/Users/prash/Desktop/Project/Carbon flux/201712.nc")
+nc_cd19 <- nc_open("C:/Users/prash/Desktop/Project/Carbon flux/201812.nc")
+
+#Printing metadata file
+{
+  sink('nc_cd1 metadata.txt')
+  print(nc_cd1)
+  sink()
+}
+
+#Extracting longitude 
+
+cd1_lon <- ncvar_get(nc_cd1, "longitude")
+
+
+
+#Extracting latitude
+cd1_lat <- ncvar_get(nc_cd1, "latitude")
+
+#Extracting Posterior land surface upward mass flux of carbon for the whole grid
+# box and the whole month without fossil
+
+cd1_cf <- ncvar_get(nc_cd1, "flux_apos_bio")
+cd2_cf <- ncvar_get(nc_cd2, "flux_apos_bio")
+cd3_cf <- ncvar_get(nc_cd3, "flux_apos_bio")
+cd4_cf <- ncvar_get(nc_cd4, "flux_apos_bio")
+cd5_cf <- ncvar_get(nc_cd5, "flux_apos_bio")
+cd6_cf <- ncvar_get(nc_cd6, "flux_apos_bio")
+cd7_cf <- ncvar_get(nc_cd7, "flux_apos_bio")
+cd8_cf <- ncvar_get(nc_cd8, "flux_apos_bio")
+cd9_cf <- ncvar_get(nc_cd9, "flux_apos_bio")
+cd10_cf <- ncvar_get(nc_cd10, "flux_apos_bio")
+cd11_cf <- ncvar_get(nc_cd11, "flux_apos_bio")
+cd12_cf <- ncvar_get(nc_cd12, "flux_apos_bio")
+cd13_cf <- ncvar_get(nc_cd13, "flux_apos_bio")
+cd14_cf <- ncvar_get(nc_cd14, "flux_apos_bio")
+cd15_cf <- ncvar_get(nc_cd15, "flux_apos_bio")
+cd16_cf <- ncvar_get(nc_cd16, "flux_apos_bio")
+cd17_cf <- ncvar_get(nc_cd17, "flux_apos_bio")
+cd18_cf <- ncvar_get(nc_cd18, "flux_apos_bio")
+cd19_cf <- ncvar_get(nc_cd19, "flux_apos_bio")
+
+#Check for fill value for the missing values
+miss <- ncatt_get(nc_cd1, "flux_apos_bio", "_FillValue")
+miss
+
+#close nc file
+nc_close(nc_cd1)
+nc_close(nc_cd2)
+nc_close(nc_cd3)
+nc_close(nc_cd4)
+nc_close(nc_cd5)
+nc_close(nc_cd6)
+nc_close(nc_cd7)
+nc_close(nc_cd8)
+nc_close(nc_cd9)
+nc_close(nc_cd10)
+nc_close(nc_cd11)
+nc_close(nc_cd12)
+nc_close(nc_cd13)
+nc_close(nc_cd14)
+nc_close(nc_cd15)
+nc_close(nc_cd16)
+nc_close(nc_cd17)
+nc_close(nc_cd18)
+nc_close(nc_cd19)
+
+#Time series for carbon flux at given location
+
+cf = c(cd1_cf[32,47],cd2_cf[32,47],cd3_cf[32,47],cd4_cf[32,47],cd5_cf[32,47],
+       cd6_cf[32,47],cd7_cf[32,47],cd8_cf[32,47],cd9_cf[32,47],cd10_cf[32,47],
+       cd11_cf[32,47],cd12_cf[32,47],cd13_cf[32,47],cd14_cf[32,47],cd15_cf[32,47],
+       cd16_cf[32,47],cd17_cf[32,47],cd18_cf[32,47],cd19_cf[32,47])
+
+cf1 = c(cd1_cf[31,45],cd2_cf[31,45],cd3_cf[31,45],cd4_cf[31,45],cd5_cf[31,45],
+        cd6_cf[31,45],cd7_cf[31,45],cd8_cf[31,45],cd9_cf[31,45],cd10_cf[31,45],
+        cd11_cf[31,45],cd12_cf[31,45],cd13_cf[31,45],cd14_cf[31,45],cd15_cf[31,45],
+        cd16_cf[31,45],cd17_cf[31,45],cd18_cf[31,45],cd19_cf[31,45])
+
+cf2 = c(cd1_cf[31,46],cd2_cf[31,46],cd3_cf[31,46],cd4_cf[31,46],cd5_cf[31,46],
+        cd6_cf[31,46],cd7_cf[31,46],cd8_cf[31,46],cd9_cf[31,46],cd10_cf[31,46],
+        cd11_cf[31,46],cd12_cf[31,46],cd13_cf[31,46],cd14_cf[31,46],cd15_cf[31,46],
+        cd16_cf[31,46],cd17_cf[31,46],cd18_cf[31,46],cd19_cf[31,46])
+
+cf3 = c(cd1_cf[30,45],cd2_cf[30,45],cd3_cf[30,45],cd4_cf[30,45],cd5_cf[30,45],
+        cd6_cf[30,45],cd7_cf[30,45],cd8_cf[30,45],cd9_cf[30,45],cd10_cf[30,45],
+        cd11_cf[30,45],cd12_cf[30,45],cd13_cf[30,45],cd14_cf[30,45],cd15_cf[30,45],
+        cd16_cf[30,45],cd17_cf[30,45],cd18_cf[30,45],cd19_cf[30,45])
+
+#creating a dataframe of flux values
+cf_ts <- data.frame(year = 2000:2018, Carbonflux = cf, Carbonflux1 = cf1,
+                    Carbonflux2 = cf2, Carbonflux3 = cf3)
+
+
+#Plots
+cfts1 <- ggplot(cf_ts, aes(x=year, y=Carbonflux)) +
+  geom_line() +
+  geom_smooth(level=0.99)+
+  labs(y = 'Carbon flux (in kgC m^-2 month^-1')+
+  ggtitle("Carbon flux at Site 1")      # Set title
+
+
+
+cfts2 <- ggplot(cf_ts, aes(x=year, y=Carbonflux1)) +
+  geom_line() +
+  geom_smooth(level=0.99)+
+  labs(y = 'Carbon flux (in kgC m^-2 month^-1')+
+  ggtitle("Carbon flux at Site 2 ")      # Set title
+
+
+cfts3 <- ggplot(cf_ts, aes(x=year, y=Carbonflux2)) +
+  geom_line() +
+  geom_smooth(level=0.99)+
+  labs(y = 'Carbon flux (in kgC m^-2 month^-1')+
+  ggtitle("Carbon flux at Site 3")      # Set title
+
+cfts4 <- ggplot(cf_ts, aes(x=year, y=Carbonflux3)) +
+  geom_line() +
+  geom_smooth(level=0.99)+
+  labs(y = 'Carbon flux (in kgC m^-2 month^-1')+
+  ggtitle("Carbon flux at Site 4")      # Set title
+
+grid.arrange(cfts1,cfts2,cfts3, cfts4,  ncol=2,nrow=2)
+
+###############################################################################
+############## GAM model#######################################################
+
+library(mgcv) ## GAM modeling
+library(ggplot2)
+library(ncdf4) ## handling netCDF files
+
+#Setting folder location
+folder <- "C:/Users/prash/Desktop/Project/Carbon flux"
+
+#Getting the list of all files
+files <- list.files(folder, full.names = TRUE)
+
+#creating empty vector
+df <- c()
+
+#Appending flux values for site 1
+for(file in files){
+  
+  nc <- nc_open(file)
+  flux <- ncvar_get(nc, "flux_apos_bio")
+  df <- append(df, flux[32,47])
+}
+
+#creating a date sequence
+er <- seq(as.Date("2000-01-01"),as.Date("2018-12-01"), by = "months")
+er
+
+
+#creating a data frame o flux values
+timeseries <- data.frame(Time = er, Carbon_flux = df, timestep = seq(1,228))
+
+#Extracting month values for new column
+timeseries$month <- format(as.Date(timeseries$Time, format="%d/%m/%Y"),"%m")
+
+#Month wise flux plot
+ggplot(timeseries, aes(x=Time, y=Carbon_flux)) +
+  geom_point()+
+  geom_line() +
+  geom_smooth(method='lm')+
+  facet_wrap(.~month, ncol =4)+
+  ggtitle("Month wise Carbon flux trend at Site 1")
+
+
+#Fitting GAM model
+model0 <- gam(Carbon_flux ~ s(timestep, k=10, bs='cs'),
+              data = timeseries,
+              family = gaussian(link = 'identity'))
+
+# Summary statistics
+summary(model0)
+
+# 2nd model
+model1 <- gam(Carbon_flux ~ s(timestep, k=50, bs='cs'),
+              data = timeseries,
+              family = gaussian(link = 'identity'))
+
+summary(model1)
+
+#3rd model
+model2 <- gam(Carbon_flux ~ s(timestep, k=200, bs='cs'),
+              data = timeseries,
+              family = gaussian(link = 'identity'))
+
+summary(model2)
+
+#4th model
+model3 <- gam(Carbon_flux ~ s(timestep, k=100, bs='cs'),
+              data = timeseries,
+              family = gaussian(link = 'identity'))
+
+summary(model3)
+
+#x values to predict on
+xx<-seq(min(timeseries$timestep),max(timeseries$timestep),length=228) 
+
+#Predicting model mean 
+pred1 <-predict(model2,newdata=data.frame(timestep=xx), se.fit = T) 
+pred2 <- predict(model3,newdata=data.frame(timestep=xx), se.fit = T) 
+
+#Plotting model results 
+
+plot(timeseries$timestep,timeseries$Carbon_flux,pch=20, xlab='Time'
+     ,ylab='Carbon flux')
+lines(xx,pred1$fit,lwd=1,col="blue")
+lines(xx,pred1$fit+1.96*pred1$se.fit,col="red",lwd=1,lty=4) 
+lines(xx,pred1$fit-1.96*pred1$se.fit,col="red",lwd=1,lty=4)
+
+
+#model check
+par(mfrow = c(2,2))
+
+gam.check(model2, pch=20)
+gam.check(model3, pch=20)
+
+###############################################################################
+###################### ARIMA & SARIMA model ###################################
+
+library(forecast) #forecast ARIMA
+
+#creating time series object
+cfts <- ts(timeseries$Carbon_flux, start = c(2000,1),
+           frequency = 12)
+
+#Plotting flux values
+plot(cfts)
+
+#Decompose and plotting components
+component <- decompose(cfts)
+plot(component)
+
+#Auto ARIMA without seasonality
+mod0 <- auto.arima(cfts, max.p = 4,max.q = 4,max.d = 4, seasonal = F)
+mod0
+
+#Fitting default model
+moda <- arima(cfts, c(0,0,2))
+moda
+
+#Plotting the fitted values
+plot(cfts)
+lines(fitted(moda), lwd = 2, lty = 2, col = 'red')
+
+#2nd model
+modb <- arima(cfts, c(1,0,2))
+modb
+
+#Plotting fitted values
+plot(cfts)
+lines(fitted(modb), lwd = 2, lty = 2, col = 'blue')
+
+#Prediction
+pred_arima <- predict(modb, n.ahead = 12)
+
+#Forecasting for 12 time steps
+fc <- forecast(moda, h=12)
+autoplot(fc)
+
+######################Seasonal ARIMA#########################################
+#############################################################################
+
+#Auto ARIMA with seasonality
+mod1 <- auto.arima(cfts, max.p = 4,max.q = 4,max.d = 4, seasonal = T)
+mod1
+
+#deafult model
+modc <- arima(cfts, order = c(2,0,1), seasonal = c(0,0,2))
+modc
+plot(cfts)
+lines(fitted(modc), lwd = 2, lty = 2, col = 'red')
+
+#Forecasting
+fc1 <- forecast(modc, h=12)
+autoplot(fc1)
+
+#2nd model
+modd <- arima(cfts, order = c(2,1,1), seasonal = c(0,0,2))
+modd
+
+#3rd model
+modf <- arima(cfts, order = c(2,0,1), seasonal = c(0,0,1))
+modf
+
+#plotting fitted values
+plot(cfts)
+lines(fitted(modf), lwd = 2, lty = 2, col = 'red')
+
+#Forecasting future values
+fc2 <- forecast(modf, h=12)
+autoplot(fc2)
+
+```

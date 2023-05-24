@@ -1,0 +1,121 @@
+File C:/Users/prash/Desktop/Project/NDVI/AVHRR-Land_v005_AVH13C1_NOAA-19_20100601_c20170406132557.nc (NC_FORMAT_NETCDF4):
+
+     6 variables (excluding dimension variables):
+        short crs[ncrs]   (Contiguous storage)  
+            grid_mapping_name: latitude_longitude
+            epsg_code: EPSG:4326
+            longitude_of_prime_meridian: 0
+            semi_major_axis: 6378137
+            inverse_flattening: 298.257223563
+        float lat_bnds[nv,latitude]   (Contiguous storage)  
+        float lon_bnds[nv,longitude]   (Contiguous storage)  
+        short NDVI[longitude,latitude,time]   (Chunking: [2400,1200,1])  (Compression: shuffle,level 1)
+            scale_factor: 1e-04
+            add_offset: 0
+            long_name: NOAA Climate Data Record of Normalized Difference Vegetation Index
+            units: 1
+            valid_range: -1000
+             valid_range: 10000
+            _FillValue: -9999
+            grid_mapping: crs
+            standard_name: normalized_difference_vegetation_index
+        short TIMEOFDAY[longitude,latitude,time]   (Chunking: [2400,1200,1])  (Compression: shuffle,level 1)
+            scale_factor: 0.01
+            add_offset: 0
+            long_name: Time since Start of Data Day
+            units: hours since 2010-06-01 00:00:00
+            valid_range: 0
+             valid_range: 2399
+            _FillValue: -9999
+            grid_mapping: crs
+        short QA[longitude,latitude,time]   (Contiguous storage)  
+            flag_masks: 2
+             flag_masks: 4
+             flag_masks: 8
+             flag_masks: 16
+             flag_masks: 32
+             flag_masks: 64
+             flag_masks: 128
+             flag_masks: 256
+             flag_masks: 512
+             flag_masks: 1024
+             flag_masks: 2048
+             flag_masks: 4096
+             flag_masks: 8192
+             flag_masks: 16384
+             flag_masks: -32768
+            flag_meanings: cloudy cloud_shadow water sunglint dense_dark_vegetation night ch1_to_5_valid ch1_invalid ch2_invalid ch3_invalid ch4_invalid ch5_invalid rho3_invalid BRDF_corr_problem polar_flag
+            long_name: Quality Assurance
+            grid_mapping: crs
+
+     5 dimensions:
+        latitude  Size:3600 
+            units: degrees_north
+            long_name: latitude
+            axis: Y
+            standard_name: latitude
+            bounds: lat_bnds
+        longitude  Size:7200 
+            units: degrees_east
+            long_name: longitude
+            axis: X
+            standard_name: longitude
+            bounds: lon_bnds
+        time  Size:1 
+            units: days since 1981-01-01 00:00:00
+            long_name: time
+            axis: T
+            standard_name: time
+            calendar: gregorian
+        nv  Size:2 (no dimvar)
+        ncrs  Size:1 (no dimvar)
+
+    48 global attributes:
+        title: Normalized Difference Vegetation Index parameters derived from NOAA-19 GAC data for day 2010/152
+        institution: NASA/GSFC/SED/ESD/HBSL/TIS/MODIS-LAND > MODIS Land Science Team, Terrestrial Information Systems,  Hydrospheric and Biospheric Science Laboratory, Earth Sciences Division, Science and Exploration Directorate, Goddard Space Flight Center, NASA
+        Conventions: CF-1.6, ACDD-1.3
+        standard_name_vocabulary: CF Standard Name Table (v25, 05 July 2013)
+        naming_authority: gov.noaa.ncei
+        license: See the Use Agreement for this CDR available from the NOAA CDR webpage
+        cdm_data_type: Grid
+        time_coverage_start: 2010-06-01T00:00:00Z
+        time_coverage_end: 2010-06-01T23:59:59Z
+        product_version: v5r0
+        platform: NOAA-19 > National Oceanic & Atmospheric Administration-19
+        sensor: AVHRR > Advanced Very High Resolution Radiometer
+        keywords_vocabulary: NASA Global Change Master Directory (GCMD) Science Keywords
+        platform_vocabulary: Global Change Master Directory (GCMD) Platform Keywords
+        instrument_vocabulary: Global Change Master Directory (GCMD) Instrument Keywords
+        keywords: EARTH SCIENCE > BIOSPHERE > VEGETATION > VEGETATION INDEX
+        source: NSS.GHRR.NP.D10151.S2335.E0125.B0676263.GC, NSS.GHRR.NP.D10152.S0119.E0314.B0676364.SV, NSS.GHRR.NP.D10152.S0308.E0503.B0676465.WI, NSS.GHRR.NP.D10152.S0458.E0651.B0676566.WI, NSS.GHRR.NP.D10152.S0645.E0832.B0676667.WI, NSS.GHRR.NP.D10152.S0827.E1008.B0676768.GC, NSS.GHRR.NP.D10152.S1003.E1149.B0676869.GC, NSS.GHRR.NP.D10152.S1144.E1330.B0676970.GC, NSS.GHRR.NP.D10152.S1325.E1511.B0677071.GC, NSS.GHRR.NP.D10152.S1505.E1637.B0677172.WI, NSS.GHRR.NP.D10152.S1632.E1816.B0677273.WI, NSS.GHRR.NP.D10152.S1810.E2005.B0677274.GC, NSS.GHRR.NP.D10152.S1959.E2148.B0677475.GC, NSS.GHRR.NP.D10152.S2143.E2330.B0677576.GC, NSS.GHRR.NP.D10152.S2324.E0114.B0677677.GC, NSS.GHRR.NP.D10152.S0119.E0314.B0676364.SV.txt, NSS.GHRR.NP.D10152.S0308.E0503.B0676465.WI.txt, NSS.GHRR.NP.D10152.S0458.E0651.B0676566.WI.txt, NSS.GHRR.NP.D10152.S0645.E0832.B0676667.WI.txt, NSS.GHRR.NP.D10152.S0827.E1008.B0676768.GC.txt, NSS.GHRR.NP.D10152.S1003.E1149.B0676869.GC.txt, NSS.GHRR.NP.D10152.S1144.E1330.B0676970.GC.txt, NSS.GHRR.NP.D10152.S1325.E1511.B0677071.GC.txt, NSS.GHRR.NP.D10152.S1505.E1637.B0677172.WI.txt, NSS.GHRR.NP.D10152.S1632.E1816.B0677273.WI.txt, NSS.GHRR.NP.D10152.S1810.E2005.B0677274.GC.txt, NSS.GHRR.NP.D10152.S1959.E2148.B0677475.GC.txt, NSS.GHRR.NP.D10152.S2143.E2330.B0677576.GC.txt, NSS.GHRR.NP.D10152.S2324.E0114.B0677677.GC.txt, NCEP_REANALYSIS_SURFACE_2010152.hdf, NCEP_REANALYSIS_SURFACE_2010152.hdf, TOMS_2010152.hdf, GLOBAL_LAND_SEA.4KM, 2010_NOAA-19.OLE.txt
+        date_created: 2017-04-06T13:25:57Z
+        spatial_resolution: 0.050000 degrees per pixel
+        geospatial_lat_min: -90
+        geospatial_lat_max: 90
+        geospatial_lon_min: -180
+        geospatial_lon_max: 180
+        metadata_link: https://doi.org/10.7289/V5ZG6QH9
+        program: NOAA Climate Data Record Program for satellites
+        cdr_variable: NDVI
+        Process: LTDR_GAPS
+        PostProcessingVersion: 2.9
+        PFIIVersion: 3.5.45
+        Satellite: NOAA-19
+        Instrument: AVHRR
+        InputDataType: GAC
+        summary: AVHRR GAC data from NOAA-19 for 2010, days 152 to 152, processed by the Long-Term Land Data Record (LTDR) project (v3.5.45) into normalized difference vegetation index (NDVI) and quality-control flags. 
+        ProductionDate: 2017-04-06T13:25:57.000000Z
+        ESDT: AVH13C1
+        LocalGranuleId: AVHRR-Land_v005_AVH13C1_NOAA-19_20100601_c20170406132557.nc
+        id: AVHRR-Land_v005_AVH13C1_NOAA-19_20100601_c20170406132557.nc
+        RangeBeginningDate: 2010-152
+        RangeBeginningTime: 00:00:00.0000
+        RangeEndingDate: 2010-152
+        RangeEndingTime: 23:59:59.9999
+        PercentMissingData: 16.75
+        PercentValidDaytimeData: 28.20
+        PercentValidDaytimeLand: 28.20
+        PercentValidClearDaytimeLand: 6.86
+        PercentValidDaytimeLandInCloudShadow: 1.21
+        PercentValidClearDaytimeWater: 0.00
+        PercentValidDaytimeWaterInCloudShadow: 0.00
